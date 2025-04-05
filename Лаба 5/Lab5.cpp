@@ -4,7 +4,7 @@
 #include <chrono>
 #include <omp.h>
 
-// Последовательная версия четно-нечетной сортировки
+// РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ С‡РµС‚РЅРѕ-РЅРµС‡РµС‚РЅРѕР№ СЃРѕСЂС‚РёСЂРѕРІРєРё
 void oddEvenSortSequential(std::vector<int>& arr) {
     bool isSorted = false;
     int n = arr.size();
@@ -12,7 +12,7 @@ void oddEvenSortSequential(std::vector<int>& arr) {
     while (!isSorted) {
         isSorted = true;
 
-        // Нечетная фаза (нечетные индексы)
+        // РќРµС‡РµС‚РЅР°СЏ С„Р°Р·Р° (РЅРµС‡РµС‚РЅС‹Рµ РёРЅРґРµРєСЃС‹)
         for (int i = 1; i <= n - 2; i += 2) {
             if (arr[i] > arr[i + 1]) {
                 std::swap(arr[i], arr[i + 1]);
@@ -20,7 +20,7 @@ void oddEvenSortSequential(std::vector<int>& arr) {
             }
         }
 
-        // Четная фаза (четные индексы)
+        // Р§РµС‚РЅР°СЏ С„Р°Р·Р° (С‡РµС‚РЅС‹Рµ РёРЅРґРµРєСЃС‹)
         for (int i = 0; i <= n - 2; i += 2) {
             if (arr[i] > arr[i + 1]) {
                 std::swap(arr[i], arr[i + 1]);
@@ -30,7 +30,7 @@ void oddEvenSortSequential(std::vector<int>& arr) {
     }
 }
 
-// Параллельная версия четно-нечетной сортировки с OpenMP
+// РџР°СЂР°Р»Р»РµР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ С‡РµС‚РЅРѕ-РЅРµС‡РµС‚РЅРѕР№ СЃРѕСЂС‚РёСЂРѕРІРєРё СЃ OpenMP
 void oddEvenSortParallel(std::vector<int>& arr) {
     bool isSorted = false;
     int n = arr.size();
@@ -38,7 +38,7 @@ void oddEvenSortParallel(std::vector<int>& arr) {
     while (!isSorted) {
         isSorted = true;
 
-        // Нечетная фаза (нечетные индексы)
+        // РќРµС‡РµС‚РЅР°СЏ С„Р°Р·Р° (РЅРµС‡РµС‚РЅС‹Рµ РёРЅРґРµРєСЃС‹)
 #pragma omp parallel for shared(arr, isSorted)
         for (int i = 1; i <= n - 2; i += 2) {
             if (arr[i] > arr[i + 1]) {
@@ -50,7 +50,7 @@ void oddEvenSortParallel(std::vector<int>& arr) {
             }
         }
 
-        // Четная фаза (четные индексы)
+        // Р§РµС‚РЅР°СЏ С„Р°Р·Р° (С‡РµС‚РЅС‹Рµ РёРЅРґРµРєСЃС‹)
 #pragma omp parallel for shared(arr, isSorted)
         for (int i = 0; i <= n - 2; i += 2) {
             if (arr[i] > arr[i + 1]) {
@@ -64,7 +64,7 @@ void oddEvenSortParallel(std::vector<int>& arr) {
     }
 }
 
-// Генерация случайного массива
+// Р“РµРЅРµСЂР°С†РёСЏ СЃР»СѓС‡Р°Р№РЅРѕРіРѕ РјР°СЃСЃРёРІР°
 std::vector<int> generateRandomArray(int size) {
     std::vector<int> arr(size);
     for (int i = 0; i < size; ++i) {
@@ -73,7 +73,7 @@ std::vector<int> generateRandomArray(int size) {
     return arr;
 }
 
-// Проверка отсортированности массива
+// РџСЂРѕРІРµСЂРєР° РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°РЅРЅРѕСЃС‚Рё РјР°СЃСЃРёРІР°
 bool isSorted(const std::vector<int>& arr) {
     for (size_t i = 0; i < arr.size() - 1; ++i) {
         if (arr[i] > arr[i + 1]) {
@@ -84,32 +84,35 @@ bool isSorted(const std::vector<int>& arr) {
 }
 
 int main() {
+    // Р”Р»СЏ РєРѕСЂСЂРµРєС‚РЅРѕРіРѕ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ СЂСѓСЃСЃРєРѕРіРѕ СЏР·С‹РєР° РІ РєРѕРЅСЃРѕР»Рё Windows
+    setlocale(LC_ALL, "Russian");
+
     const int arraySize = 10000;
     std::vector<int> arrSequential = generateRandomArray(arraySize);
     std::vector<int> arrParallel = arrSequential;
 
-    // Замер времени для последовательной версии
+    // Р—Р°РјРµСЂ РІСЂРµРјРµРЅРё РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ РІРµСЂСЃРёРё
     auto start = std::chrono::high_resolution_clock::now();
     oddEvenSortSequential(arrSequential);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> sequentialTime = end - start;
 
-    // Замер времени для параллельной версии
+    // Р—Р°РјРµСЂ РІСЂРµРјРµРЅРё РґР»СЏ РїР°СЂР°Р»Р»РµР»СЊРЅРѕР№ РІРµСЂСЃРёРё
     start = std::chrono::high_resolution_clock::now();
     oddEvenSortParallel(arrParallel);
     end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> parallelTime = end - start;
 
-    // Проверка результатов
+    // РџСЂРѕРІРµСЂРєР° СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
     bool sequentialCorrect = isSorted(arrSequential);
     bool parallelCorrect = isSorted(arrParallel);
 
-    // Вывод результатов
-    std::cout << "Sequential version: " << sequentialTime.count() << " seconds, "
-        << (sequentialCorrect ? "correct" : "incorrect") << std::endl;
-    std::cout << "Parallel version: " << parallelTime.count() << " seconds, "
-        << (parallelCorrect ? "correct" : "incorrect") << std::endl;
-    std::cout << "Speedup: " << sequentialTime.count() / parallelTime.count() << std::endl;
+    // Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ РЅР° СЂСѓСЃСЃРєРѕРј СЏР·С‹РєРµ
+    std::cout << "РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ: " << sequentialTime.count() << " СЃРµРєСѓРЅРґ, "
+        << (sequentialCorrect ? "РєРѕСЂСЂРµРєС‚РЅРѕ" : "РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ") << std::endl;
+    std::cout << "РџР°СЂР°Р»Р»РµР»СЊРЅР°СЏ РІРµСЂСЃРёСЏ: " << parallelTime.count() << " СЃРµРєСѓРЅРґ, "
+        << (parallelCorrect ? "РєРѕСЂСЂРµРєС‚РЅРѕ" : "РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ") << std::endl;
+    std::cout << "РЈСЃРєРѕСЂРµРЅРёРµ: " << sequentialTime.count() / parallelTime.count() << "x" << std::endl;
 
     return 0;
 }
