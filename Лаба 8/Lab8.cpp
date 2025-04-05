@@ -5,13 +5,15 @@
 #include <omp.h>
 #include <stdexcept>
 #include <cmath>
+#include <windows.h>
+#include <locale>
 
 using matrix = std::vector<std::vector<double>>;
 
-// Генерация случайной матрицы размером r x c
+// Р“РµРЅРµСЂР°С†РёСЏ СЃР»СѓС‡Р°Р№РЅРѕР№ РјР°С‚СЂРёС†С‹ СЂР°Р·РјРµСЂРѕРј r x c
 matrix generate(int r, int c) {
     if (r <= 0 || c <= 0) {
-        throw std::invalid_argument("Matrix dimensions must be positive");
+        throw std::invalid_argument("Р Р°Р·РјРµСЂС‹ РјР°С‚СЂРёС†С‹ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹РјРё");
     }
 
     std::random_device rd;
@@ -27,23 +29,23 @@ matrix generate(int r, int c) {
     return result;
 }
 
-// Проверка совместимости размеров матрицы и вектора
+// РџСЂРѕРІРµСЂРєР° СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё СЂР°Р·РјРµСЂРѕРІ РјР°С‚СЂРёС†С‹ Рё РІРµРєС‚РѕСЂР°
 void check_dimensions(const matrix& a, const std::vector<double>& b) {
     if (a.empty() || b.empty()) {
-        throw std::invalid_argument("Matrix or vector is empty");
+        throw std::invalid_argument("РњР°С‚СЂРёС†Р° РёР»Рё РІРµРєС‚РѕСЂ РїСѓСЃС‚С‹");
     }
     size_t cols = a[0].size();
     for (const auto& row : a) {
         if (row.size() != cols) {
-            throw std::invalid_argument("Matrix must be rectangular");
+            throw std::invalid_argument("РњР°С‚СЂРёС†Р° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРѕР№");
         }
     }
     if (cols != b.size()) {
-        throw std::invalid_argument("Matrix columns must match vector size");
+        throw std::invalid_argument("Р§РёСЃР»Рѕ СЃС‚РѕР»Р±С†РѕРІ РјР°С‚СЂРёС†С‹ РґРѕР»Р¶РЅРѕ СЃРѕРІРїР°РґР°С‚СЊ СЃ СЂР°Р·РјРµСЂРѕРј РІРµРєС‚РѕСЂР°");
     }
 }
 
-// Последовательное умножение матрицы на вектор
+// РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ СѓРјРЅРѕР¶РµРЅРёРµ РјР°С‚СЂРёС†С‹ РЅР° РІРµРєС‚РѕСЂ
 std::vector<double> multiply(const matrix& a, const std::vector<double>& b) {
     check_dimensions(a, b);
 
@@ -60,7 +62,7 @@ std::vector<double> multiply(const matrix& a, const std::vector<double>& b) {
     return result;
 }
 
-// Параллельное умножение матрицы на вектор с использованием OpenMP
+// РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ СѓРјРЅРѕР¶РµРЅРёРµ РјР°С‚СЂРёС†С‹ РЅР° РІРµРєС‚РѕСЂ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј OpenMP
 std::vector<double> multiply_parallel(const matrix& a, const std::vector<double>& b) {
     check_dimensions(a, b);
 
@@ -80,22 +82,22 @@ std::vector<double> multiply_parallel(const matrix& a, const std::vector<double>
     return result;
 }
 
-// Сравнение производительности последовательной и параллельной версий
+// РЎСЂР°РІРЅРµРЅРёРµ РїСЂРѕРёР·РІРѕРґРёС‚РµР»СЊРЅРѕСЃС‚Рё РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ Рё РїР°СЂР°Р»Р»РµР»СЊРЅРѕР№ РІРµСЂСЃРёР№
 void compare(const matrix& a, const std::vector<double>& b) {
     try {
-        // Последовательное умножение
+        // РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ СѓРјРЅРѕР¶РµРЅРёРµ
         auto start_seq = std::chrono::high_resolution_clock::now();
         auto result_seq = multiply(a, b);
         auto end_seq = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> seq_time = end_seq - start_seq;
 
-        // Параллельное умножение
+        // РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ СѓРјРЅРѕР¶РµРЅРёРµ
         auto start_par = std::chrono::high_resolution_clock::now();
         auto result_par = multiply_parallel(a, b);
         auto end_par = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> par_time = end_par - start_par;
 
-        // Проверка корректности результатов
+        // РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
         bool correct = true;
         for (size_t i = 0; i < result_seq.size(); ++i) {
             if (std::abs(result_seq[i] - result_par[i]) > 1e-6) {
@@ -104,34 +106,37 @@ void compare(const matrix& a, const std::vector<double>& b) {
             }
         }
 
-        // Вывод результатов
-        std::cout << "Matrix size: " << a.size() << "x" << a[0].size() << "\n";
-        std::cout << "Vector size: " << b.size() << "\n";
-        std::cout << "Sequential time: " << seq_time.count() << " seconds\n";
-        std::cout << "Parallel time: " << par_time.count() << " seconds\n";
-        std::cout << "Speedup: " << seq_time.count() / par_time.count() << "x\n";
-        std::cout << "Results are " << (correct ? "identical" : "different") << "\n";
+        // Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
+        std::cout << "Р Р°Р·РјРµСЂ РјР°С‚СЂРёС†С‹: " << a.size() << "x" << a[0].size() << "\n";
+        std::cout << "Р Р°Р·РјРµСЂ РІРµРєС‚РѕСЂР°: " << b.size() << "\n";
+        std::cout << "Р’СЂРµРјСЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ: " << seq_time.count() << " СЃРµРєСѓРЅРґ\n";
+        std::cout << "Р’СЂРµРјСЏ РїР°СЂР°Р»Р»РµР»СЊРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ: " << par_time.count() << " СЃРµРєСѓРЅРґ\n";
+        std::cout << "РЈСЃРєРѕСЂРµРЅРёРµ: " << seq_time.count() / par_time.count() << "x\n";
+        std::cout << "Р РµР·СѓР»СЊС‚Р°С‚С‹ " << (correct ? "СЃРѕРІРїР°РґР°СЋС‚" : "СЂР°Р·Р»РёС‡Р°СЋС‚СЃСЏ") << "\n";
     }
     catch (const std::exception& e) {
-        std::cerr << "Error in comparison: " << e.what() << std::endl;
+        std::cerr << "РћС€РёР±РєР° РїСЂРё СЃСЂР°РІРЅРµРЅРёРё: " << e.what() << std::endl;
     }
 }
 
 int main() {
+    SetConsoleOutputCP(CP_UTF8);
+    setlocale(LC_ALL, "Russian");
+
     try {
-        const int size = 10000; // Размер матрицы и вектора
+        const int size = 10000; // Р Р°Р·РјРµСЂ РјР°С‚СЂРёС†С‹ Рё РІРµРєС‚РѕСЂР°
 
-        // Генерация матрицы и вектора
-        std::cout << "Generating matrix and vector..." << std::endl;
+        // Р“РµРЅРµСЂР°С†РёСЏ РјР°С‚СЂРёС†С‹ Рё РІРµРєС‚РѕСЂР°
+        std::cout << "Р“РµРЅРµСЂР°С†РёСЏ РјР°С‚СЂРёС†С‹ Рё РІРµРєС‚РѕСЂР°..." << std::endl;
         matrix mat = generate(size, size);
-        std::vector<double> vec(size, 1.0); // Простой вектор из единиц для теста
+        std::vector<double> vec(size, 1.0); // РџСЂРѕСЃС‚РѕР№ РІРµРєС‚РѕСЂ РёР· РµРґРёРЅРёС† РґР»СЏ С‚РµСЃС‚Р°
 
-        // Сравнение производительности
+        // РЎСЂР°РІРЅРµРЅРёРµ РїСЂРѕРёР·РІРѕРґРёС‚РµР»СЊРЅРѕСЃС‚Рё
         compare(mat, vec);
 
     }
     catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "РћС€РёР±РєР°: " << e.what() << std::endl;
         return 1;
     }
 
