@@ -4,11 +4,12 @@
 #include <atomic>
 #include <vector>
 #include <chrono>
+#include <windows.h>
 
 const int ITERATIONS = 1'000'000;
 const int THREADS_COUNT = 10;
 
-// Общий ресурс для всех подходов
+// РћР±С‰РёР№ СЂРµСЃСѓСЂСЃ РґР»СЏ РІСЃРµС… РїРѕРґС…РѕРґРѕРІ
 int shared_value_no_sync = 0;
 int shared_value_mutex = 0;
 std::atomic<int> shared_value_atomic(0);
@@ -38,12 +39,12 @@ void test_approach(void (*func)(), const std::string& name) {
     std::vector<std::thread> threads;
     auto start = std::chrono::high_resolution_clock::now();
 
-    // Создаем и запускаем потоки
+    // РЎРѕР·РґР°РµРј Рё Р·Р°РїСѓСЃРєР°РµРј РїРѕС‚РѕРєРё
     for (int i = 0; i < THREADS_COUNT; ++i) {
         threads.emplace_back(func);
     }
 
-    // Ожидаем завершения всех потоков
+    // РћР¶РёРґР°РµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РІСЃРµС… РїРѕС‚РѕРєРѕРІ
     for (auto& t : threads) {
         t.join();
     }
@@ -51,33 +52,35 @@ void test_approach(void (*func)(), const std::string& name) {
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
 
-    // Выводим результаты
-    if (name == "No synchronization") {
-        std::cout << name << " result: " << shared_value_no_sync;
+    // Р’С‹РІРѕРґРёРј СЂРµР·СѓР»СЊС‚Р°С‚С‹
+    if (name == "Р‘РµР· СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё") {
+        std::cout << name << ": " << shared_value_no_sync;
     }
-    else if (name == "With mutex") {
-        std::cout << name << " result: " << shared_value_mutex;
+    else if (name == "РЎ РјСЊСЋС‚РµРєСЃРѕРј") {
+        std::cout << name << ": " << shared_value_mutex;
     }
     else {
-        std::cout << name << " result: " << shared_value_atomic;
+        std::cout << name << ": " << shared_value_atomic;
     }
 
-    std::cout << " | Time: " << duration.count() << "s\n";
+    std::cout << " | Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ: " << duration.count() << " СЃРµРє.\n";
 }
 
 int main() {
-    std::cout << "Testing different synchronization approaches with "
-        << THREADS_COUNT << " threads and "
-        << ITERATIONS << " iterations per thread...\n\n";
+    SetConsoleOutputCP(CP_UTF8);
+    setlocale(LC_ALL, "Russian");
+    std::cout << "РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ СЂР°Р·Р»РёС‡РЅС‹С… РїРѕРґС…РѕРґРѕРІ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё СЃ "
+        << THREADS_COUNT << " РїРѕС‚РѕРєР°РјРё Рё "
+        << ITERATIONS << " РёС‚РµСЂР°С†РёСЏРјРё РЅР° РєР°Р¶РґС‹Р№ РїРѕС‚РѕРє...\n\n";
 
-    // Тестируем подход без синхронизации
-    test_approach(increment_no_sync, "No synchronization");
+    // РўРµСЃС‚РёСЂСѓРµРј РїРѕРґС…РѕРґ Р±РµР· СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё
+    test_approach(increment_no_sync, "Р‘РµР· СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё");
 
-    // Тестируем подход с мьютексом
-    test_approach(increment_mutex, "With mutex");
+    // РўРµСЃС‚РёСЂСѓРµРј РїРѕРґС…РѕРґ СЃ РјСЊСЋС‚РµРєСЃРѕРј
+    test_approach(increment_mutex, "РЎ РјСЊСЋС‚РµРєСЃРѕРј");
 
-    // Тестируем подход с атомарными операциями
-    test_approach(increment_atomic, "With atomic");
+    // РўРµСЃС‚РёСЂСѓРµРј РїРѕРґС…РѕРґ СЃ Р°С‚РѕРјР°СЂРЅС‹РјРё РѕРїРµСЂР°С†РёСЏРјРё
+    test_approach(increment_atomic, "РђС‚РѕРјР°СЂРЅС‹Рµ РѕРїРµСЂР°С†РёРё");
 
     return 0;
 }
