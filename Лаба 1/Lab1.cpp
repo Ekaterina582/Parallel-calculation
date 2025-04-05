@@ -5,7 +5,7 @@
 #include <mutex>
 #include <cassert>
 
-// Последовательное вычисление факториала
+// ГЏГ®Г±Г«ГҐГ¤Г®ГўГ ГІГҐГ«ГјГ­Г®ГҐ ГўГ»Г·ГЁГ±Г«ГҐГ­ГЁГҐ ГґГ ГЄГІГ®Г°ГЁГ Г«Г 
 unsigned long long sequential_factorial(int n) {
     if (n < 0) return 0;
     unsigned long long result = 1;
@@ -15,7 +15,7 @@ unsigned long long sequential_factorial(int n) {
     return result;
 }
 
-// Параллельное вычисление факториала
+// ГЏГ Г°Г Г«Г«ГҐГ«ГјГ­Г®ГҐ ГўГ»Г·ГЁГ±Г«ГҐГ­ГЁГҐ ГґГ ГЄГІГ®Г°ГЁГ Г«Г 
 unsigned long long parallel_factorial(int n, int num_threads) {
     if (n < 0) return 0;
     if (n < 2) return 1;
@@ -57,22 +57,22 @@ unsigned long long parallel_factorial(int n, int num_threads) {
 }
 
 int main() {
-    const int n = 20; // Число для вычисления факториала
-    const int num_threads = std::thread::hardware_concurrency(); // Количество потоков
+    const int n = 20; // Г—ГЁГ±Г«Г® Г¤Г«Гї ГўГ»Г·ГЁГ±Г«ГҐГ­ГЁГї ГґГ ГЄГІГ®Г°ГЁГ Г«Г 
+    const int num_threads = std::thread::hardware_concurrency(); // ГЉГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГЇГ®ГІГ®ГЄГ®Гў
 
-    // Последовательное вычисление
+    // ГЏГ®Г±Г«ГҐГ¤Г®ГўГ ГІГҐГ«ГјГ­Г®ГҐ ГўГ»Г·ГЁГ±Г«ГҐГ­ГЁГҐ
     auto start_seq = std::chrono::high_resolution_clock::now();
     unsigned long long seq_result = sequential_factorial(n);
     auto end_seq = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> seq_duration = end_seq - start_seq;
 
-    // Параллельное вычисление
+    // ГЏГ Г°Г Г«Г«ГҐГ«ГјГ­Г®ГҐ ГўГ»Г·ГЁГ±Г«ГҐГ­ГЁГҐ
     auto start_par = std::chrono::high_resolution_clock::now();
     unsigned long long par_result = parallel_factorial(n, num_threads);
     auto end_par = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> par_duration = end_par - start_par;
 
-    // Вывод результатов
+    // Г‚Г»ГўГ®Г¤ Г°ГҐГ§ГіГ«ГјГІГ ГІГ®Гў
     std::cout << "Factorial of " << n << ":\n";
     std::cout << "Sequential result: " << seq_result << "\n";
     std::cout << "Parallel result:   " << par_result << "\n\n";
@@ -81,7 +81,7 @@ int main() {
     std::cout << "Sequential: " << seq_duration.count() << " seconds\n";
     std::cout << "Parallel:   " << par_duration.count() << " seconds (" << num_threads << " threads)\n\n";
 
-    // Проверка корректности
+    // ГЏГ°Г®ГўГҐГ°ГЄГ  ГЄГ®Г°Г°ГҐГЄГІГ­Г®Г±ГІГЁ
     if (seq_result == par_result) {
         std::cout << "Results match!\n";
     }
@@ -89,7 +89,7 @@ int main() {
         std::cout << "Error: Results don't match!\n";
     }
 
-    // Вычисление ускорения
+    // Г‚Г»Г·ГЁГ±Г«ГҐГ­ГЁГҐ ГіГ±ГЄГ®Г°ГҐГ­ГЁГї
     double speedup = seq_duration.count() / par_duration.count();
     std::cout << "Speedup: " << speedup << "x\n";
 
