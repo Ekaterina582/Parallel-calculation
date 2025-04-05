@@ -5,122 +5,118 @@
 #include <omp.h>
 #include <locale>
 #include <windows.h>
+#include <cstdlib> // РґР»СЏ srand
 
 using namespace std;
 using namespace std::chrono;
 
-// Функция для создания подматрицы (исключает строку и столбец)
+/*
+ * РЎРѕР·РґР°РµС‚ РїРѕРґРјР°С‚СЂРёС†Сѓ, РёСЃРєР»СЋС‡Р°СЏ СѓРєР°Р·Р°РЅРЅС‹Рµ СЃС‚СЂРѕРєСѓ Рё СЃС‚РѕР»Р±РµС†
+ * matrix - РёСЃС…РѕРґРЅР°СЏ РјР°С‚СЂРёС†Р°
+ * excludeRow - РёСЃРєР»СЋС‡Р°РµРјР°СЏ СЃС‚СЂРѕРєР°
+ * excludeCol - РёСЃРєР»СЋС‡Р°РµРјС‹Р№ СЃС‚РѕР»Р±РµС†
+ */
 vector<vector<double>> getSubmatrix(const vector<vector<double>>& matrix, int excludeRow, int excludeCol) {
-    int n = matrix.size();
-    vector<vector<double>> submatrix(n - 1, vector<double>(n - 1));
+    int n = matrix.size() - 1;
+    vector<vector<double>> submatrix(n, vector<double>(n));
 
-    int row = 0;
-    for (int i = 0; i < n; i++) {
-        if (i == excludeRow) continue;
-
-        int col = 0;
-        for (int j = 0; j < n; j++) {
-            if (j == excludeCol) continue;
-
+    for (int i = 0, row = 0; row < n; i++, row++) {
+        if (i == excludeRow) i++;
+        for (int j = 0, col = 0; col < n; j++, col++) {
+            if (j == excludeCol) j++;
             submatrix[row][col] = matrix[i][j];
-            col++;
         }
-        row++;
     }
-
     return submatrix;
 }
 
-// Последовательное вычисление определителя (рекурсивный метод)
+/*
+ * РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ РѕРїСЂРµРґРµР»РёС‚РµР»СЏ (СЂРµРєСѓСЂСЃРёРІРЅС‹Р№ РјРµС‚РѕРґ)
+ */
 double determinantSequential(const vector<vector<double>>& matrix) {
     int n = matrix.size();
-
-    // Базовые случаи
     if (n == 1) return matrix[0][0];
     if (n == 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
 
     double det = 0;
-
-    // Разложение по первой строке
     for (int col = 0; col < n; col++) {
-        vector<vector<double>> submatrix = getSubmatrix(matrix, 0, col);
-        det += matrix[0][col] * pow(-1, col) * determinantSequential(submatrix);
+        auto submatrix = getSubmatrix(matrix, 0, col);
+        det += matrix[0][col] * ((col % 2 == 0) ? 1 : -1) * determinantSequential(submatrix);
     }
-
     return det;
 }
 
-// Параллельное вычисление определителя (с использованием OpenMP)
+/*
+ * РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ РѕРїСЂРµРґРµР»РёС‚РµР»СЏ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј OpenMP
+ */
 double determinantParallel(const vector<vector<double>>& matrix) {
     int n = matrix.size();
-
     if (n == 1) return matrix[0][0];
     if (n == 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
 
     double det = 0;
-
 #pragma omp parallel for reduction(+:det)
     for (int col = 0; col < n; col++) {
-        vector<vector<double>> submatrix = getSubmatrix(matrix, 0, col);
-        det += matrix[0][col] * pow(-1, col) * determinantSequential(submatrix);
+        auto submatrix = getSubmatrix(matrix, 0, col);
+        det += matrix[0][col] * ((col % 2 == 0) ? 1 : -1) * determinantSequential(submatrix);
     }
-
     return det;
 }
 
-// Функция для генерации случайной матрицы
+/*
+ * Р“РµРЅРµСЂР°С†РёСЏ СЃР»СѓС‡Р°Р№РЅРѕР№ РєРІР°РґСЂР°С‚РЅРѕР№ РјР°С‚СЂРёС†С‹ Р·Р°РґР°РЅРЅРѕРіРѕ СЂР°Р·РјРµСЂР°
+ * size - СЂР°Р·РјРµСЂ РјР°С‚СЂРёС†С‹
+ */
 vector<vector<double>> generateRandomMatrix(int size) {
     vector<vector<double>> matrix(size, vector<double>(size));
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            matrix[i][j] = rand() % 10; // значения от 0 до 9
+    srand(static_cast<unsigned>(time(nullptr)));
+    for (auto& row : matrix) {
+        for (auto& elem : row) {
+            elem = rand() % 10;
         }
     }
     return matrix;
 }
 
 int main() {
+    // РќР°СЃС‚СЂРѕР№РєР° РєРѕРЅСЃРѕР»Рё РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕРіРѕ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РєРёСЂРёР»Р»РёС†С‹
     SetConsoleOutputCP(CP_UTF8);
     setlocale(LC_ALL, "Russian");
+
     int size;
-    std::cout << "Введите размер квадратной матрицы: ";
+    cout << "Р’РІРµРґРёС‚Рµ СЂР°Р·РјРµСЂ РєРІР°РґСЂР°С‚РЅРѕР№ РјР°С‚СЂРёС†С‹: ";
     cin >> size;
 
-    // Генерация матрицы
-    vector<vector<double>> matrix = generateRandomMatrix(size);
+    auto matrix = generateRandomMatrix(size);
 
-    // Вывод матрицы (для небольших размеров)
+    // Р’С‹РІРѕРґ РјР°С‚СЂРёС†С‹ (РґР»СЏ СЂР°Р·РјРµСЂРѕРІ <= 10)
     if (size <= 10) {
-        std::cout << "Матрица:" << endl;
+        cout << "\nРЎРіРµРЅРµСЂРёСЂРѕРІР°РЅРЅР°СЏ РјР°С‚СЂРёС†Р°:\n";
         for (const auto& row : matrix) {
             for (double val : row) {
-                std::cout << val << " ";
+                cout << val << " ";
             }
-            std::cout << endl;
+            cout << "\n";
         }
     }
 
-    // Последовательное вычисление
+    // РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ
     auto start = high_resolution_clock::now();
     double detSeq = determinantSequential(matrix);
-    auto stop = high_resolution_clock::now();
-    auto durationSeq = duration_cast<milliseconds>(stop - start);
+    auto durationSeq = duration_cast<milliseconds>(high_resolution_clock::now() - start);
 
-    std::cout << "Последовательный определитель: " << detSeq << endl;
-    std::cout << "Время последовательного вычисления: " << durationSeq.count() << " мс" << endl;
-
-    // Параллельное вычисление
+    // РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ
     start = high_resolution_clock::now();
     double detPar = determinantParallel(matrix);
-    stop = high_resolution_clock::now();
-    auto durationPar = duration_cast<milliseconds>(stop - start);
+    auto durationPar = duration_cast<milliseconds>(high_resolution_clock::now() - start);
 
-    std::cout << "Параллельный определитель: " << detPar << endl;
-    std::cout << "Время параллельного вычисления: " << durationPar.count() << " мс" << endl;
-
-    // Вычисление ускорения
-    double speedup = static_cast<double>(durationSeq.count()) / durationPar.count();
-    std::cout << "Ускорение: " << speedup << "x" << endl;
+    // Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
+    cout << "\nР РµР·СѓР»СЊС‚Р°С‚С‹:\n";
+    cout << "РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅС‹Р№ РѕРїСЂРµРґРµР»РёС‚РµР»СЊ: " << detSeq << "\n";
+    cout << "РџР°СЂР°Р»Р»РµР»СЊРЅС‹Р№ РѕРїСЂРµРґРµР»РёС‚РµР»СЊ: " << detPar << "\n";
+    cout << "Р’СЂРµРјСЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРіРѕ РІС‹С‡РёСЃР»РµРЅРёСЏ: " << durationSeq.count() << " РјСЃ\n";
+    cout << "Р’СЂРµРјСЏ РїР°СЂР°Р»Р»РµР»СЊРЅРѕРіРѕ РІС‹С‡РёСЃР»РµРЅРёСЏ: " << durationPar.count() << " РјСЃ\n";
+    cout << "РЈСЃРєРѕСЂРµРЅРёРµ: " << static_cast<double>(durationSeq.count()) / durationPar.count() << "x\n";
 
     return 0;
 }
