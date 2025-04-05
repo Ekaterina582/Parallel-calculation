@@ -3,8 +3,9 @@
 #include <random>
 #include <chrono>
 #include <omp.h>
+#include <windows.h>
 
-// Функция для генерации массива случайных чисел
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РіРµРЅРµСЂР°С†РёРё РјР°СЃСЃРёРІР° СЃР»СѓС‡Р°Р№РЅС‹С… С‡РёСЃРµР»
 std::vector<int> generate_random_array(size_t size, int min_val, int max_val) {
     std::vector<int> array(size);
     std::random_device rd;
@@ -18,7 +19,7 @@ std::vector<int> generate_random_array(size_t size, int min_val, int max_val) {
     return array;
 }
 
-// Последовательное вычисление суммы
+// РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ СЃСѓРјРјС‹
 long long sum(const std::vector<int>& array) {
     long long total = 0;
     for (int num : array) {
@@ -27,12 +28,12 @@ long long sum(const std::vector<int>& array) {
     return total;
 }
 
-// Параллельное вычисление суммы с использованием OpenMP
+// РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ СЃСѓРјРјС‹ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј OpenMP
 long long sum_parallel(const std::vector<int>& array) {
     long long total = 0;
 
 #pragma omp parallel for reduction(+:total)
-    for (size_t i = 0; i < array.size(); ++i) {
+    for (int i = 0; i < array.size(); ++i) {
         total += array[i];
     }
 
@@ -40,38 +41,40 @@ long long sum_parallel(const std::vector<int>& array) {
 }
 
 int main() {
-    // Размер массива можно изменить для тестирования
+    SetConsoleOutputCP(CP_UTF8);
+    setlocale(LC_ALL, "Russian");
+    // Р Р°Р·РјРµСЂ РјР°СЃСЃРёРІР° РјРѕР¶РЅРѕ РёР·РјРµРЅРёС‚СЊ РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ
     const size_t array_size = 100000000;
     const int min_val = 1;
     const int max_val = 100;
 
-    std::cout << "Генерация массива из " << array_size << " элементов..." << std::endl;
+    std::cout << "Р“РµРЅРµСЂР°С†РёСЏ РјР°СЃСЃРёРІР° РёР· " << array_size << " СЌР»РµРјРµРЅС‚РѕРІ..." << std::endl;
     std::vector<int> numbers = generate_random_array(array_size, min_val, max_val);
 
-    // Последовательное вычисление
-    std::cout << "Последовательное вычисление суммы..." << std::endl;
+    // РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ
+    std::cout << "РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ СЃСѓРјРјС‹..." << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
     long long seq_sum = sum(numbers);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> seq_time = end - start;
 
-    std::cout << "Сумма (последовательно): " << seq_sum << std::endl;
-    std::cout << "Время выполнения: " << seq_time.count() << " секунд" << std::endl;
+    std::cout << "РЎСѓРјРјР° (РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ): " << seq_sum << std::endl;
+    std::cout << "Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ: " << seq_time.count() << " СЃРµРєСѓРЅРґ" << std::endl;
 
-    // Параллельное вычисление
-    std::cout << "\nПараллельное вычисление суммы..." << std::endl;
+    // РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ
+    std::cout << "\nРџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ СЃСѓРјРјС‹..." << std::endl;
     start = std::chrono::high_resolution_clock::now();
     long long par_sum = sum_parallel(numbers);
     end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> par_time = end - start;
 
-    std::cout << "Сумма (параллельно): " << par_sum << std::endl;
-    std::cout << "Время выполнения: " << par_time.count() << " секунд" << std::endl;
+    std::cout << "РЎСѓРјРјР° (РїР°СЂР°Р»Р»РµР»СЊРЅРѕ): " << par_sum << std::endl;
+    std::cout << "Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ: " << par_time.count() << " СЃРµРєСѓРЅРґ" << std::endl;
 
-    // Сравнение результатов
-    std::cout << "\nРезультаты сравнения:" << std::endl;
-    std::cout << "Разница в суммах: " << std::abs(seq_sum - par_sum) << std::endl;
-    std::cout << "Ускорение: " << seq_time.count() / par_time.count() << "x" << std::endl;
+    // РЎСЂР°РІРЅРµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
+    std::cout << "\nР РµР·СѓР»СЊС‚Р°С‚С‹ СЃСЂР°РІРЅРµРЅРёСЏ:" << std::endl;
+    std::cout << "Р Р°Р·РЅРёС†Р° РІ СЃСѓРјРјР°С…: " << std::abs(seq_sum - par_sum) << std::endl;
+    std::cout << "РЈСЃРєРѕСЂРµРЅРёРµ: " << seq_time.count() / par_time.count() << "x" << std::endl;
 
     return 0;
 }
