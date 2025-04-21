@@ -26,8 +26,7 @@
 2. **Параллельная (Parallel)** – с использованием OpenMP.  
 
 **Ключевые особенности:**  
-- Использованы директивы OpenMP:  
-  - `#pragma omp parallel for shared(arr, isSorted)`  
+- Использованы директивы OpenMP:  #pragma omp parallel for shared(arr, isSorted)`  
   - Критические секции (`#pragma omp critical`) для защиты операций обмена и изменения флага `isSorted`.  
 - Размер тестового массива: **10 000 элементов**.  
 
